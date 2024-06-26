@@ -38,4 +38,7 @@ Example
 }
 ```
 
+### How does it look like
+
+![image](https://github.com/ibm-watson-iot/maximo-asset-monitor-pipeline-utils/assets/11428923/a63ed977-dbb6-4690-bf8e-0d1b23adcb5e)
 
