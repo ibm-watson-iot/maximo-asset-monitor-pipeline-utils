@@ -60,7 +60,7 @@ CATALOG_FUNCTION_NAME_KEY = 'name'
 KPI_FUNCTION_NAME_KEY = 'name'
 KPI_FUNCTION_FUNCTIONNAME_KEY = 'catalogFunctionName'
 KPI_FUNCTION_FUNCTION_ID_KEY = 'kpiFunctionId'
-KPI_FUNCTION_ENABLED_KEY = 'enabled'
+#KPI_FUNCTION_ENABLED_KEY = 'enabled'
 KPI_FUNCTION_GRANULARITY_KEY = 'granularityName'
 KPI_FUNCTION_INPUT_KEY = 'input'
 KPI_FUNCTION_OUTPUT_KEY = 'output'
@@ -351,26 +351,28 @@ class PipelineReader:
                 diagram = "graph LR\n "
 
             #self.tree_level(), self.name, str(['(%s) %s' % (dep.tree_level(), dep.name) for dep in self.dependency]))
+            linkCount = 0
             for q in queue:
                 #print(q.kpi)
                 catalogFunctionName = None
                 try:
-                    catalogFunctionName = q.kpi['catalogFunctionName']
+                    catalogFunctionName = q.kpi[KPI_FUNCTION_FUNCTIONNAME_KEY]
                 except Exception as e:
                     print('EX1', str(e))
                 logger.info('Func ', catalogFunctionName)
                 if catalogFunctionName == 'ChildDataLoader':
-                    for dep in q.kpi['input']['loadedDataItems']:
+                    for dep in q.kpi[KPI_FUNCTION_INPUT_KEY]['loadedDataItems']:
                         #print('DEPEND', dep)
                         try:
-                            diagram += dep['childDataItemName'].replace('--','__') + " -- " + 'CHILDREN:' + dep['aggregationFunction']['catalogFunctionName'] +\
+                            diagram += dep['childDataItemName'].replace('--','__') + " -- " + 'CHILDREN:' + dep['aggregationFunction'][KPI_FUNCTION_FUNCTIONNAME_KEY] +\
                                      "--> " + q.name.replace('--','__') + "\n"
+                            linkCount += 1
                         except Exception as e:
                             print('EX2', str(e))
                 elif catalogFunctionName == 'InternalHierarchySummary':
                     print(q.kpi)
                     '''
-                    for dep in q.kpi['input']['loadedDataItems']:
+                    for dep in q.kpi[KPI_FUNCTION_INPUT_KEY]['loadedDataItems']:
                         #print('DEPEND', dep)
                         try:
                             diagram += dep['childDataItemName'].replace('--','__') + " -- " + 'CHILDREN:' + dep['aggregationFunction']['catalogFunctionName'] +\
@@ -383,6 +385,9 @@ class PipelineReader:
                         dot += dep.name + " -> " + q.name + "[label=" + q.kpi[KPI_FUNCTION_FUNCTIONNAME_KEY] + ",weight=" + str(dep.tree_level()+1) + "];"
                         # -- in names breaks the mermaid syntax
                         diagram += dep.name.replace('--','__') + " -- " + q.kpi[KPI_FUNCTION_FUNCTIONNAME_KEY] + " --> " + q.name.replace('--','__') + "\n"
+                        if q.kpi[KPI_FUNCTION_FUNCTIONNAME_KEY] in self.catalog.unavailable_functions:
+                            diagram += "linkStyle " + str(linkCount) + " stroke:#ff3,stroke-width:4px,color:red;"
+                        linkCount += 1
             dot += "}"
             print(diagram)
             #

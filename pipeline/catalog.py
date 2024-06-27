@@ -24,11 +24,13 @@ CATEGORY_AGGREGATOR = 'AGGREGATOR'
 CATEGORY_ALERT = 'ALERT'
 CATALOG_REGISTER_TEMPLATE = '/api/catalog/v1/{0}/function/{1}'
 
+
 logger = logging.getLogger(__name__)
 
 class Catalog(object):
     def __init__(self):
         self.catalogs = defaultdict(dict)
+        self.unavailable_functions = []
 
     def get_function(self, name):
         return self.catalogs.get(name, None)
@@ -234,9 +236,6 @@ class Catalog(object):
             msg = 'running pip install'
             logger.debug(msg)
 
-            #if host_url.lower().endswith(".svc"):
-            #    sequence = ['pip', 'install', '--no-cache-dir', '--trusted-host', host_url, '--upgrade', url]
-            #else:
             sequence = ['pip', 'install', '--break-system-packages', '--no-cache-dir', '--trusted-host', host_url, '--upgrade', url]
 
             completed_process = subprocess.run(sequence, stderr=subprocess.STDOUT, stdout=subprocess.PIPE,
@@ -255,22 +254,30 @@ class Catalog(object):
 
     def _register_local(self, name, category, module_and_target_name, url, input_params, output_params,
                         incremental_update, import_local=True, install=True):
+        available = True
         if install and url is not None:
             if not self._install(url):
-                return False
+                available = False
+            
 
         function = {'name': name, 'category': category, 'module_and_target_name': module_and_target_name, 'url': url,
                     'input': input_params, 'output': output_params,
                     'incremental_update': incremental_update if category == CATEGORY_AGGREGATOR else None, }
 
-        #print(function)
+        if not available:
+            self.unavailable_functions.append(name)
 
+        self.catalogs[name] = function
+        return True
+
+        '''
         if not import_local or self._get_function(function) is not None:
             self.catalogs[name] = function
             return True
         else:
             logger.warning('error loading function %s' % name)
             return False
+        '''
 
     def _unregister_local(self, name):
         if name in self.catalogs:
