@@ -85,11 +85,17 @@ The repository monitor pipeline consists of different python files which are:
 -	Pipeline Folder:
   
 •	deploy.py
+
 •	dag.py
+
 •	util.py
+
 •	web.py
+
 •	catalog.py
+
 * main.py
+* 
 * requirements.txt
 
 Brief description of the files:
@@ -99,6 +105,7 @@ Brief description of the files:
 This file consists of transformers and aggregator functions which are used to create rolling averages and weighted averages for the spaces, floors and buildings. It also consists of GET function method which will usually calculate sum, min, max, mean etc functions for the transformation and aggregation. Additionally, there are methods for registering and unregistering aggregator and transformers in the clusters.
 
 •	util.py:
+
 This file is responsible for managing APIs for the creation, deletion and updation of resources from the monitor server. This consists of GET, POST, DELETE and PUT methods on API. 
 ◦	GET: It is used to run GET API to fetch resources from the server. For example: function definitions of the metrics, kpi functions, number of buildings in the cluster.
 Example url: /api/v2/core/sites/{siteId}/locations/{locationId}/kpiFunctions 
@@ -110,6 +117,7 @@ Example url: /api/v2/core/sites/{siteId}/locations/{locationId}/kpiFunctions/{na
 Example url: /api/v2/core/sites/{siteId}/locations/{locationId}/kpiFunctions/{name}
 
 •	dag.py
+
 This file is used to manage the pipeline in the monitor cluster and consists of different classes which are given below:
 ◦	class grains: This class is used to manage the granularity such as minutes, hours, days, etc, in the monitor cluster.
 ◦	metadata: This class if for managing data items, names, types, dimensions, raw metrics and derived metrics.
@@ -117,21 +125,25 @@ This file is used to manage the pipeline in the monitor cluster and consists of 
 ◦	class-pipeline-reader: This class is for managing the pipeline reader in the monitor cluster. It also initializes tenant id and even creates the database connection to the cluster. 
 
 •	web.py
+
 This file is used for creating http request and getting http response between client and monitor server.
 
 •	Requirements.txt
+
 This file currently consists of two python modules.
 ◦	iotfunctions 9.0.0
 ◦	inquirer 3.2.0
 
 •	deploy.py
+
 This file consist of three function which deploys Spaces, Floors and Building in the instance for creating metrics which will further create the histogram in the dashboard. 
 
 •	main.py
+
 This file uses the aforementioned modules for managing the pipeline, deploying spaces and this file usually gets the information of all the buildings in the cluster by running the GET method and based on the command line arguments specified while initializing the function. Based on the building name specified in the command line arguments, main.py will create rolling average, extract max at the daily level for each of the spaces. 
 
 
-Appendix
+### Appendix
 
 Steps to set up the space planning component in UI
 
