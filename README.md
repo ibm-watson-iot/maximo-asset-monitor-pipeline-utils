@@ -1,16 +1,25 @@
-How to set up a space planning dashboard in Monitor
+# monitor-pipeline-utils
+
+Monitor-pipeline-utils is a python module to deal with two use cases:
+
+1. Create pipeline elements for space planning of a building
+2. Render an asset's pipeline as directed acyclic graph (DAG)
+
+
+## How to set up a space planning dashboard in Monitor
 
 1. Objective
 2. Flowchart of pipeline
 3. Detailed steps involved in building the pipeline
 
-Objective
+### Objective
+
 The objective show free capacity in a building based on historic occupancy data. We recommend to show the number of seats that are almost always unused along with the overall capacity of the building.
 To underpin the number of unused seats we recommend to set up a histogram-like bar chart that shows how often maximum occupancy was reached.
 
 ![image](https://media.github.ibm.com/user/370291/files/5ad2a6c1-557a-437b-bc35-7a6859c105f4)
 
-Steps for the pipeline setup: 
+### Steps for the pipeline setup: 
 
 ·	Select Building, floors and spaces from the hierarchy list.
 ·	Implement Rolling Average Using Custom window sizes (15 & 30)
@@ -18,60 +27,38 @@ Steps for the pipeline setup:
 ·	Aggregated with expression by taking granularity as “daily”  
 ·	Aggregate the daily max at floor and building level
 
+The KPI functions for these computations are deployed with the python code in this repository.
 
-The following graphs have been generated from the Space Insights setup of MAS Monitor’s test environment to serve as example for a Space Insights pipeline configuration for the three layers of spaces, floors and building in Monitor’s Test environment.
-The steps circled in red are related to the space planning component that is subject of this documentation.
+Example:
 
-Space Layer
+`python main.py --tenant-id main --site IBMCLOUD_TEST3 --deploy Green`
 
-![image](https://media.github.ibm.com/user/370291/files/94ebf2bf-a0a4-478a-b478-5849ec9c60a6)
-
-Floor Layer
-
-![image](https://media.github.ibm.com/user/370291/files/97414e54-f079-46d7-b53a-887dd9de9602)
-
-Building Layer
-
-![image](https://media.github.ibm.com/user/370291/files/48985ffe-9851-4718-93b4-db0b822f4beb)
-
-Setting up the space utilization dashboard for a building
-
-Space utilization requires to compute a robust daily maximum occupancy for the entire building.
-
-This PythonExpression cuts off outliers, i.e. the highest 1% of occupancy counts. This occupancy level is what you have to plan for to avoid sending employees home.
- 
-![image](https://media.github.ibm.com/user/370291/files/704b0d71-792a-4224-aed6-ff3acb5a62ed)
-
-To explain the computed values we also recommend to implement a histogram like chart similar to the example of section 1. The height of the left-most bar indicates whether maximum occupancy is regularly reached (normal bar height) or an outlier (low bar height).
-
-This PythonFunction is used to compute the input data for this histogram like bar chart
- 
-![image](https://media.github.ibm.com/user/370291/files/a63371e5-83e2-4b92-93b8-4b46ff1952a9)
+shows a selection list containing all locations containing "Green" as substring in tenant "main" and site "IBMCLOUD_TEST3". Selecting a building location will deploy all KPI functions for space planning.
 
 Since we provide 10 bins for this bar chart and encode them as time series data for the last 10 days, we need to configure the “space utilization” dashboard to render the last 10 days
 
 
-This is how to do it in the dashboard configuration menu
+### Configuring the dashboard
 
-4.1 The steps are:
+Navigate to the building in the location hierarchy in Maximo Asset Monitor's Setup menu after deploying the KPI functions for space planning (as described in the previous section).
 
-4.1.1 Go to Charlotte Green Centre in hierarchy list
+As in the example below click the selected building,
 
 ![image](https://media.github.ibm.com/user/370291/files/4eecc0f8-07ce-4a5e-9f03-3bdc6dc933e1)
 
-4.1.2. Click on Dashoboards
+select the "Dashboard" entry in the menu
 
 ![image](https://media.github.ibm.com/user/370291/files/1d98866b-b647-416a-8bf7-8946a3c66492)
 
-4.1.3 In dashboards page, navigate to space utilization and click on the three vertical dots which is on the right side and then select edit
+On the dashboards page, select "Add Dashboard" to create a new dashboard for space planning.
 
 ![image](https://media.github.ibm.com/user/370291/files/279b450b-b47f-4a61-b4c4-ee989982ba91)
 
-4.1.4 In the next page we click on the bar chart which will open the side bar for editing/creating a new graph
+The next page will show an empty dashboard with widgets shown on the left side bar for editing/creating a new graph
 
 ![image](https://media.github.ibm.com/user/370291/files/69c89c03-004a-4168-9854-ae90f09815ad)
 
-In the side bar, click on content, here changes can be made to the graph, such as title, size, time range. The open JSON editor can be used to edit the card configuration as shown in the screenshot below
+Add a bar chart and use the built-in JSON editorto edit the card configuration as shown in the screenshot below
 
 ![image](https://media.github.ibm.com/user/370291/files/20ad65dc-bfe0-40d3-874d-8c02af506316)
  
@@ -91,25 +78,24 @@ similar to capacity
 
 The histogram like bar chart, a simple bar chart widget, requires editing its configuration in the JSON editor as shown before.
 
-monitor-pipeline-utils
-Monitor-pipeline-utils is a python module to deal with various use cases:
-•	Render an asset's pipeline as directed acyclic graph (DAG)
-•	Create pipeline elements for space planning of a building
-
+## What is found in this repository
 
 The repository monitor pipeline consists of different python files which are:
 
 -	Pipeline Folder:
+  
 •	deploy.py
 •	dag.py
 •	util.py
 •	web.py
 •	catalog.py
--	main.py
--	requirements.txt
+* main.py
+* requirements.txt
 
 Brief description of the files:
+
 •	catalog.py:
+
 This file consists of transformers and aggregator functions which are used to create rolling averages and weighted averages for the spaces, floors and buildings. It also consists of GET function method which will usually calculate sum, min, max, mean etc functions for the transformation and aggregation. Additionally, there are methods for registering and unregistering aggregator and transformers in the clusters.
 
 •	util.py:
