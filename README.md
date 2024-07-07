@@ -199,9 +199,13 @@ This file is responsible for calling Monitor's REST API.
 •       dag.py
 
 This file is used to manage the pipeline in the monitor cluster and consists of different classes which are given below:
+
 ◦       class grains: This class is used to manage the granularity such as minutes, hours, days, etc, in the monitor cluster.
+
 ◦       metadata: This class if for managing data items, names, types, dimensions, raw metrics and derived metrics.
+
 ◦       kpi-tree-node: This class is for managing kpi functions, for getting all the dependencies within the kpi tree and also to get all the descendants within the tree nodes.
+
 ◦       class-pipeline-reader: This class is for managing the pipeline reader in the monitor cluster. It also initializes tenant id and even creates the database connection to the cluster. 
 
 •       web.py
@@ -213,6 +217,7 @@ This file is used for creating http request and getting http response between cl
 This file lists two python modules as dependencies
 
 ◦       iotfunctions 9.0.0
+
 ◦       inquirer 3.2.0
 
 •       deploy.py
