@@ -94,33 +94,42 @@ def deploy_building(locations, loc_idx, sitemeta):
 
     i = loc_idx
 
-    logger.info('Deploy to Building: ' + str(locations[i]['alias']))
+
+    logger.info('Proceed to lower levels first')
+
+    i += 1
+    stack_floors = []
+
+    while i < len(locations) and locations[i]['depth'] > my_depth:
+
+        if locations[i][LOCATION_TYPE] == TRIRIGA_FLOOR:
+            stack_floors.append(i)
+            logger.info('Floor in stack', locations[i])
+            #deploy_floor(locations, i, sitemeta)
+        elif locations[i][LOCATION_TYPE] == TRIRIGA_SPACE:
+            deploy_space(locations, i, sitemeta)
+        i += 1
+
+    for i in range(len(stack_floors)):
+        deploy_floor(locations, stack_floors[i], sitemeta)
+
+    # deploy building related KPIs last
+    logger.info('Deploy KPIs to Building: ' + str(locations[loc_idx]['alias']))
 
     try:
-        post_res = util.api_request('/api/v2/core/sites/' + sitemeta[0]['uuid'] + '/locations/' + locations[i]['uuid'] + '/kpiFunctions',
+        post_res = util.api_request('/api/v2/core/sites/' + sitemeta[0]['uuid'] + '/locations/' + locations[loc_idx]['uuid'] + '/kpiFunctions',
                                          method='post', json=json.loads(kpi_agg_def), timeout=60)
         print('Created Aggregator result:', post_res)
         
-        post_res = util.api_request('/api/v2/core/sites/' + sitemeta[0]['uuid'] + '/locations/' + locations[i]['uuid'] + '/kpiFunctions',
+        post_res = util.api_request('/api/v2/core/sites/' + sitemeta[0]['uuid'] + '/locations/' + locations[loc_idx]['uuid'] + '/kpiFunctions',
                                          method='post', json=kpi_dailyhist_def, timeout=60)
         print('Created daily histogram result:', post_res)
         
-        post_res = util.api_request('/api/v2/core/sites/' + sitemeta[0]['uuid'] + '/locations/' + locations[i]['uuid'] + '/kpiFunctions',
+        post_res = util.api_request('/api/v2/core/sites/' + sitemeta[0]['uuid'] + '/locations/' + locations[loc_idx]['uuid'] + '/kpiFunctions',
                                          method='post', json=kpi_robdaily_def, timeout=60)
         print('Created robust daily max result:', post_res)
     except Exception as e:
         print(e)
-
-    logger.info('Proceed to lower levels')
-
-    i += 1
-    while i < len(locations) and locations[i]['depth'] > my_depth:
-
-        if locations[i][LOCATION_TYPE] == TRIRIGA_FLOOR:
-            deploy_floor(locations, i, sitemeta)
-        elif locations[i][LOCATION_TYPE] == TRIRIGA_SPACE:
-            deploy_space(locations, i, sitemeta)
-        i += 1
 
     logger.info('B: Covered ' + str(i - loc_idx) + ' locations')
     
